@@ -1,0 +1,37 @@
+body {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+#div_text {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(8, 8, 8);
+    width: 500px;
+    height: 500px;
+    color: white;
+}
+
+button {
+    display: block;
+    margin-top: 10px;
+    padding: 5px;
+}
+
+#points {
+    text-align: center;
+}
+
+canvas {
+    display: block;
+    background-color: black;
+}
