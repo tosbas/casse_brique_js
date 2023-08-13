@@ -6,16 +6,32 @@ const messageBox = document.getElementById("messageBox");
 const textInMessageBox = document.getElementById("text");
 const bouton_start = document.getElementById("bouton_start");
 
+const audio = document.getElementById("audio");
+
 let start = false;
 
-canvas.width = 600;
 canvas.height = 600;
 
 const paddleWidth = 100;
 const paddleHeight = 10;
 const paddleSpeed = 7;
 const ballRadius = 10;
-const ballSpeed = 5;
+
+let posXStartBrique = 50;
+const posYStartBrique = 100;
+let height = 20;
+const maxRow = 5;
+const maxBrique = 10;
+const spaceY = 10;
+const spaceX = 10;
+
+if (window.innerWidth > 800) {
+    canvas.width = 800;
+} else {
+    canvas.width = window.innerWidth;
+    height = 15;
+    posXStartBrique = 30;
+}
 
 let rightPressed = false;
 let leftPressed = false;
@@ -49,8 +65,8 @@ class Paddle {
     }
 
     draw() {
-        ctx.fillStyle = "red";
         ctx.beginPath();
+        ctx.fillStyle = "red";
         ctx.fillRect(this.x, this.y, this.width, this.height);
         ctx.fill();
     }
@@ -72,8 +88,8 @@ class Ball {
         this.x = x;
         this.y = y;
         this.radius = radius;
-        this.speedX = ballSpeed;
-        this.speedY = ballSpeed;
+        this.vx = 2;
+        this.vy = 7;
     }
 
     draw() {
@@ -84,15 +100,13 @@ class Ball {
     }
 
     move() {
-        this.x += this.speedX;
-        this.y += this.speedY;
 
         if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
-            this.speedX = -this.speedX;
+            this.vx = -this.vx;
         }
 
         if (this.y - this.radius < 0) {
-            this.speedY = -this.speedY;
+            this.vy = -this.vy;
         }
 
         if (this.y + this.radius > paddle.y &&
@@ -101,14 +115,19 @@ class Ball {
             this.x - this.radius < paddle.x + paddle.width
         ) {
 
-            this.speedY = -this.speedY;
-        }
+            if (this.y + this.radius > paddle.y && this.x < paddle.x + paddleWidth / 4) {
+                this.vx = 2;
+            } else if (this.y + this.radius > paddle.y && this.x > paddle.x + paddleWidth - paddleWidth / 4) {
+                this.vx = -2;
+            }
 
-        if (this.speedX > ballSpeed) {
-            this.speedX = ballSpeed;
+            this.vy = -this.vy;
         }
 
         this.draw();
+
+        this.x += this.vx;
+        this.y += this.vy;
 
         if (this.y + this.radius > canvas.height) {
             this.y = canvas.height - this.radius;
@@ -117,6 +136,8 @@ class Ball {
         }
 
         return false;
+
+
     }
 }
 
@@ -124,13 +145,6 @@ let ball = new Ball(canvas.width / 2, canvas.height - paddleHeight - ballRadius,
 let bricks = [];
 
 function createBricks() {
-    const posXStartBrique = 10;
-    const posYStartBrique = 10;
-    const height = 20;
-    const maxRow = 5;
-    const maxBrique = 5;
-    const spaceY = 10;
-    const spaceX = 10;
 
     let posX = posXStartBrique;
     let posY = posYStartBrique;
@@ -170,15 +184,16 @@ function draw() {
                     ball.y + ball.radius > bricks[i].y &&
                     ball.y - ball.radius < bricks[i].y + bricks[i].height
                 ) {
+                    playSound("Sound/sound-brick.mp3");
                     bricks.splice(i, 1);
                     points_numbers.innerText++;
-                    ball.speedY = -ball.speedY;
+                    ball.vy = -ball.vy;
                     break;
                 }
             }
         }
 
-        if(bricks.length == 0){
+        if (bricks.length == 0) {
             gameWin();
         }
 
@@ -192,12 +207,20 @@ const gameOver = () => {
     start = false;
     textInMessageBox.textContent = "Vous avez perdu !";
     messageBox.classList.remove("cacheText");
+    playSound("Sound/sound-defeat.mp3");
 }
 
 const gameWin = () => {
     start = false;
     textInMessageBox.textContent = "Félicitation !";
     messageBox.classList.remove("cacheText");
+    playSound("Sound/sound-success.mp3");
+}
+
+const playSound = (src) => {
+    audio.src = src;
+    audio.currentTime = 0
+    audio.play();
 }
 
 const showMessage = (message) => {
