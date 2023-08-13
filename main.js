@@ -178,6 +178,10 @@ function draw() {
             }
         }
 
+        if(bricks.length == 0){
+            gameWin();
+        }
+
         paddle.move();
     }
 
@@ -187,6 +191,12 @@ function draw() {
 const gameOver = () => {
     start = false;
     textInMessageBox.textContent = "Vous avez perdu !";
+    messageBox.classList.remove("cacheText");
+}
+
+const gameWin = () => {
+    start = false;
+    textInMessageBox.textContent = "Félicitation !";
     messageBox.classList.remove("cacheText");
 }
 
