@@ -13,6 +13,7 @@ let start = false;
 let startLaunch = false;
 
 canvas.height = 600;
+canvas.width = 800;
 
 //Paddle conf 
 const PADDLE_WIDTH = 100;
@@ -32,15 +33,6 @@ const POSY_START_BRIQUE = 100;
 const MAX_ROW = 5;
 const MAX_BRIQUES = 5;
 const BRIQUES_SPACEY = 30;
-
-
-if (window.innerWidth > 800) {
-    canvas.width = 800;
-} else {
-    canvas.width = window.innerWidth;
-    height = 15;
-    posXStartBrique = 30;
-}
 
 let rightPressed = false;
 let leftPressed = false;
