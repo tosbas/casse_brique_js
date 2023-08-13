@@ -9,23 +9,37 @@ body {
     overflow: hidden;
 }
 
-#div_text {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    background-color: rgb(8, 8, 8);
-    width: 500px;
-    height: 500px;
-    color: white;
-}
+.cacheText {
+    visibility: hidden;
+  }
+  
 
-button {
-    display: block;
+#bouton_start {
     margin-top: 10px;
     padding: 5px;
-}
+    background-color: orange;
+    border: 2px solid black;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  #messageBox {
+    position: absolute;
+    border: 5px solid black;
+    font-size: 24px;
+    padding: 5px;
+    background-color: white;
+    width: 250px;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: black;
+  }
+  
 
 #points {
     text-align: center;
