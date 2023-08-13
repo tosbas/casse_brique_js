@@ -26,6 +26,27 @@ header {
 }
 
 
+#helper {
+  color: #ffffff;
+  padding: 20px;
+  animation: anim 2s infinite ease-in-out;
+}
+
+@keyframes anim {
+  0% {
+    font-size: 16px;
+  }
+
+  50% {
+    font-size: 18px;
+  }
+
+  100% {
+    font-size: 16px;
+  }
+}
+
+
 #bouton_start {
   margin-top: 10px;
   padding: 5px;
@@ -42,7 +63,7 @@ header {
   font-size: 24px;
   padding: 5px;
   background-color: white;
-  width: 250px;
+  width: 300px;
   display: flex;
   text-align: center;
   flex-direction: column;

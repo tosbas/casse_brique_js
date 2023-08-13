@@ -5,25 +5,34 @@ const points_numbers = document.getElementById("points_numbers");
 const messageBox = document.getElementById("messageBox");
 const textInMessageBox = document.getElementById("text");
 const bouton_start = document.getElementById("bouton_start");
+const helper = document.getElementById("helper");
 
 const audio = document.getElementById("audio");
 
 let start = false;
+let startLaunch = false;
 
 canvas.height = 600;
 
-const paddleWidth = 100;
-const paddleHeight = 10;
-const paddleSpeed = 7;
-const ballRadius = 10;
+//Paddle conf 
+const PADDLE_WIDTH = 100;
+const PADDLE_HEIGHT = 10;
+const PADDLE_SPEED = 7;
 
+//Ball conf
+const BALL_RADIUS = 10;
+const BALL_VX = 2;
+const BALL_VY = 5;
+
+//Briques conf
 let posXStartBrique = 50;
-const posYStartBrique = 100;
 let height = 20;
-const maxRow = 5;
-const maxBrique = 10;
-const spaceY = 10;
-const spaceX = 10;
+
+const POSY_START_BRIQUE = 100;
+const MAX_ROW = 5;
+const MAX_BRIQUES = 5;
+const BRIQUES_SPACEY = 30;
+
 
 if (window.innerWidth > 800) {
     canvas.width = 800;
@@ -37,15 +46,16 @@ let rightPressed = false;
 let leftPressed = false;
 
 class Brique {
-    constructor(x, y, width, height) {
+    constructor(x, y, width, height, color) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.color = color
     }
 
     draw() {
-        ctx.fillStyle = "red";
+        ctx.fillStyle = this.color;
         ctx.strokeStyle = "white";
         ctx.strokeRect(this.x, this.y, this.width, this.height);
         ctx.beginPath();
@@ -57,11 +67,11 @@ class Brique {
 
 class Paddle {
     constructor() {
-        this.x = canvas.width / 2 - paddleWidth / 2;
-        this.y = canvas.height - paddleHeight;
-        this.width = paddleWidth;
-        this.height = paddleHeight;
-        this.speed = paddleSpeed;
+        this.x = canvas.width / 2 - PADDLE_WIDTH / 2;
+        this.y = canvas.height - PADDLE_HEIGHT;
+        this.width = PADDLE_WIDTH;
+        this.height = PADDLE_HEIGHT;
+        this.speed = PADDLE_SPEED;
     }
 
     draw() {
@@ -74,9 +84,19 @@ class Paddle {
     move() {
         if (rightPressed && this.x < canvas.width - this.width) {
             this.x += this.speed;
+
+            if (!startLaunch) {
+                ball.x += this.speed;
+            }
+
         }
         else if (leftPressed && this.x > 0) {
             this.x -= this.speed;
+
+            if (!startLaunch) {
+                ball.x -= this.speed;
+            }
+
         }
     }
 };
@@ -88,8 +108,8 @@ class Ball {
         this.x = x;
         this.y = y;
         this.radius = radius;
-        this.vx = 2;
-        this.vy = 7;
+        this.vx = BALL_VX;
+        this.vy = BALL_VY;
     }
 
     draw() {
@@ -115,16 +135,14 @@ class Ball {
             this.x - this.radius < paddle.x + paddle.width
         ) {
 
-            if (this.y + this.radius > paddle.y && this.x < paddle.x + paddleWidth / 4) {
-                this.vx = 2;
-            } else if (this.y + this.radius > paddle.y && this.x > paddle.x + paddleWidth - paddleWidth / 4) {
-                this.vx = -2;
+            if (this.y + this.radius > paddle.y && this.x < paddle.x + PADDLE_WIDTH / 6) {
+                this.vx = BALL_VX;
+            } else if (this.y + this.radius > paddle.y && this.x > paddle.x + PADDLE_WIDTH - PADDLE_WIDTH / 6) {
+                this.vx = -BALL_VX;
             }
 
             this.vy = -this.vy;
         }
-
-        this.draw();
 
         this.x += this.vx;
         this.y += this.vy;
@@ -141,32 +159,38 @@ class Ball {
     }
 }
 
-let ball = new Ball(canvas.width / 2, canvas.height - paddleHeight - ballRadius, ballRadius);
+let ball = new Ball(canvas.width / 2, canvas.height - PADDLE_HEIGHT - BALL_RADIUS, BALL_RADIUS);
 let bricks = [];
 
 function createBricks() {
 
     let posX = posXStartBrique;
-    let posY = posYStartBrique;
+    let posY = POSY_START_BRIQUE;
 
-    for (let i = 0; i < maxRow; i++) {
-        for (let j = 0; j < maxBrique; j++) {
-            const width = (canvas.width - (maxBrique - 1) * spaceX - 2 * posXStartBrique) / maxBrique;
+    for (let i = 0; i < MAX_ROW; i++) {
+        for (let j = 0; j < MAX_BRIQUES; j++) {
+            const width = (canvas.width - (MAX_BRIQUES - 1) * BRIQUES_SPACEY - 2 * posXStartBrique) / MAX_BRIQUES;
 
-            bricks.push(new Brique(posX, posY, width, height));
+            const h = Math.floor(Math.random() * 358);
+            const s = 100;
+            const l = 50;
 
-            if (j < maxBrique - 1) {
-                posX += width + spaceX;
+            const color = `hsl(${h},${s}%, ${l}%)`;
+
+            bricks.push(new Brique(posX, posY, width, height, color));
+
+            if (j < MAX_BRIQUES - 1) {
+                posX += width + BRIQUES_SPACEY;
             }
         }
 
         posX = posXStartBrique;
-        posY += height + spaceY;
+        posY += height + BRIQUES_SPACEY;
     }
 }
 
 function draw() {
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ball.draw();
@@ -174,28 +198,32 @@ function draw() {
     bricks.forEach(brick => brick.draw());
 
     if (start) {
-        const gameOver = ball.move();
 
-        if (!gameOver) {
-            for (let i = 0; i < bricks.length; i++) {
-                if (
-                    ball.x + ball.radius > bricks[i].x &&
-                    ball.x - ball.radius < bricks[i].x + bricks[i].width &&
-                    ball.y + ball.radius > bricks[i].y &&
-                    ball.y - ball.radius < bricks[i].y + bricks[i].height
-                ) {
-                    playSound("Sound/sound-brick.mp3");
-                    bricks.splice(i, 1);
-                    points_numbers.innerText++;
-                    ball.vy = -ball.vy;
-                    break;
+        if (startLaunch) {
+            const gameOver = ball.move();
+
+            if (!gameOver) {
+                for (let i = 0; i < bricks.length; i++) {
+                    if (
+                        ball.x + ball.radius > bricks[i].x &&
+                        ball.x - ball.radius < bricks[i].x + bricks[i].width &&
+                        ball.y + ball.radius > bricks[i].y &&
+                        ball.y - ball.radius < bricks[i].y + bricks[i].height
+                    ) {
+                        playSound("Sound/sound-brick.mp3");
+                        bricks.splice(i, 1);
+                        points_numbers.innerText++;
+                        ball.vy = -ball.vy;
+                        break;
+                    }
                 }
+            }
+
+            if (bricks.length == 0) {
+                gameWin();
             }
         }
 
-        if (bricks.length == 0) {
-            gameWin();
-        }
 
         paddle.move();
     }
@@ -205,6 +233,7 @@ function draw() {
 
 const gameOver = () => {
     start = false;
+    startLaunch = false;
     textInMessageBox.textContent = "Vous avez perdu !";
     messageBox.classList.remove("cacheText");
     playSound("Sound/sound-defeat.mp3");
@@ -212,6 +241,7 @@ const gameOver = () => {
 
 const gameWin = () => {
     start = false;
+    startLaunch = false;
     textInMessageBox.textContent = "Félicitation !";
     messageBox.classList.remove("cacheText");
     playSound("Sound/sound-success.mp3");
@@ -236,6 +266,9 @@ const keyDownHandler = (e) => {
     }
     else if (e.keyCode == 37) {
         leftPressed = true;
+    } else if (e.keyCode == 32) {
+        startLaunch = true;
+        helper.textContent = "";
     }
 }
 const keyUpHandler = (e) => {
@@ -250,15 +283,15 @@ const keyUpHandler = (e) => {
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
-
 bouton_start.addEventListener("click", () => {
-    ball = new Ball(canvas.width / 2, canvas.height - paddleHeight - ballRadius, ballRadius);
-    paddle.x = canvas.width / 2 - paddleWidth / 2;
+    ball = new Ball(canvas.width / 2, canvas.height - PADDLE_HEIGHT - BALL_RADIUS, BALL_RADIUS);
+    paddle.x = canvas.width / 2 - PADDLE_WIDTH / 2;
     bricks = [];
     createBricks();
     points_numbers.textContent = 0;
     showMessage("");
     start = true;
+    helper.textContent = "Appuyer sur espace pour lancer la balle, <- et -> pour bouger";
 });
 
 createBricks();
