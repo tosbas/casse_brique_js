@@ -12,7 +12,15 @@
 
   <header>
     <h1>Casse brique Javascript</h1>
-
+    <div id="menu-lvl">
+      <p>Sélectionner un niveau de difficulté <select id="select-lvl">
+          <option value="0">Novice</option>
+          <option value="1">Intermédiaire</option>
+          <option value="2">Avancé</option>
+          <option value="3">Pro</option>
+        </select>
+      </p>
+    </div>
     <div id="points">Points: <span id="points_numbers">0</span></div>
   </header>
 
@@ -24,7 +32,7 @@
   <canvas></canvas>
 
   <div id="messageBox">
-    <span id="text">Bienvenue, pour commencer appuyer sur le bouton</span>
+    <span id="text">Bienvenue pour commencer, appuyer sur le bouton</span>
     <button id="bouton_start">Start</button>
   </div>
 

@@ -7,6 +7,9 @@ const textInMessageBox = document.getElementById("text");
 const bouton_start = document.getElementById("bouton_start");
 const helper = document.getElementById("helper");
 
+const select_lvl = document.getElementById("select-lvl");
+const menu_lvl = document.getElementById("menu-lvl");
+
 const audio = document.getElementById("audio");
 
 let start = false;
@@ -16,26 +19,28 @@ canvas.height = 600;
 canvas.width = 800;
 
 //Paddle conf 
-const PADDLE_WIDTH = 100;
+const PADDLE_WIDTH = 50;
 const PADDLE_HEIGHT = 10;
 const PADDLE_SPEED = 7;
 
 //Ball conf
 const BALL_RADIUS = 10;
 const BALL_VX = 2;
-const BALL_VY = 5;
+let ball_vy = 2;
 
 //Briques conf
 let posXStartBrique = 50;
 let height = 20;
 
 const POSY_START_BRIQUE = 100;
-const MAX_ROW = 5;
-const MAX_BRIQUES = 5;
+let max_row = 5;
+let max_briques = 5;
 const BRIQUES_SPACEY = 30;
 
 let rightPressed = false;
 let leftPressed = false;
+
+
 
 class Brique {
     constructor(x, y, width, height, color) {
@@ -64,17 +69,21 @@ class Paddle {
         this.width = PADDLE_WIDTH;
         this.height = PADDLE_HEIGHT;
         this.speed = PADDLE_SPEED;
+        this.cornerWidht = 30;
     }
 
     draw() {
         ctx.beginPath();
         ctx.fillStyle = "red";
         ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillStyle = "orange";
+        ctx.fillRect(this.x - this.cornerWidht, this.y, this.cornerWidht, this.height)
+        ctx.fillRect(this.x + this.width, this.y, this.cornerWidht, this.height)
         ctx.fill();
     }
 
     move() {
-        if (rightPressed && this.x < canvas.width - this.width) {
+        if (rightPressed && this.x + this.width + this.cornerWidht < canvas.width) {
             this.x += this.speed;
 
             if (!startLaunch) {
@@ -82,7 +91,7 @@ class Paddle {
             }
 
         }
-        else if (leftPressed && this.x > 0) {
+        else if (leftPressed && this.x - this.cornerWidht > 0) {
             this.x -= this.speed;
 
             if (!startLaunch) {
@@ -101,7 +110,8 @@ class Ball {
         this.y = y;
         this.radius = radius;
         this.vx = BALL_VX;
-        this.vy = BALL_VY;
+        this.vy = ball_vy;
+
     }
 
     draw() {
@@ -123,14 +133,23 @@ class Ball {
 
         if (this.y + this.radius > paddle.y &&
             this.y - this.radius < paddle.y + paddle.height &&
-            this.x + this.radius > paddle.x &&
-            this.x - this.radius < paddle.x + paddle.width
+            this.x + this.radius > paddle.x - paddle.cornerWidht &&
+            this.x - this.radius < paddle.x + paddle.width + paddle.cornerWidht
         ) {
 
-            if (this.y + this.radius > paddle.y && this.x < paddle.x + PADDLE_WIDTH / 6) {
-                this.vx = BALL_VX;
-            } else if (this.y + this.radius > paddle.y && this.x > paddle.x + PADDLE_WIDTH - PADDLE_WIDTH / 6) {
-                this.vx = -BALL_VX;
+            if (this.y + this.radius > paddle.y && this.x + this.radius < paddle.x && this.x + this.radius > paddle.x - paddle.cornerWidht) {
+                if (this.vx == -2) {
+                    this.vx = BALL_VX;
+                } else {
+                    this.vx = -BALL_VX;
+                }
+
+            } else if (this.y + this.radius > paddle.y && this.x - this.radius > paddle.x + PADDLE_WIDTH && this.x - this.radius < paddle.x + PADDLE_WIDTH + paddle.cornerWidht) {
+                if (this.vx == -2) {
+                    this.vx = BALL_VX;
+                } else {
+                    this.vx = -BALL_VX;
+                }
             }
 
             this.vy = -this.vy;
@@ -141,7 +160,7 @@ class Ball {
 
         if (this.y + this.radius > canvas.height) {
             this.y = canvas.height - this.radius;
-            gameOver();
+            gameTerminated("Vous avez perdu !", "Sound/sound-defeat.mp3");
             return true;
         }
 
@@ -159,9 +178,9 @@ function createBricks() {
     let posX = posXStartBrique;
     let posY = POSY_START_BRIQUE;
 
-    for (let i = 0; i < MAX_ROW; i++) {
-        for (let j = 0; j < MAX_BRIQUES; j++) {
-            const width = (canvas.width - (MAX_BRIQUES - 1) * BRIQUES_SPACEY - 2 * posXStartBrique) / MAX_BRIQUES;
+    for (let i = 0; i < max_row; i++) {
+        for (let j = 0; j < max_briques; j++) {
+            const width = (canvas.width - (max_briques - 1) * BRIQUES_SPACEY - 2 * posXStartBrique) / max_briques;
 
             const h = Math.floor(Math.random() * 358);
             const s = 100;
@@ -171,7 +190,7 @@ function createBricks() {
 
             bricks.push(new Brique(posX, posY, width, height, color));
 
-            if (j < MAX_BRIQUES - 1) {
+            if (j < max_briques - 1) {
                 posX += width + BRIQUES_SPACEY;
             }
         }
@@ -212,7 +231,7 @@ function draw() {
             }
 
             if (bricks.length == 0) {
-                gameWin();
+                gameTerminated("Félicitation !", "Sound/sound-success.mp3")
             }
         }
 
@@ -223,24 +242,19 @@ function draw() {
     requestAnimationFrame(draw);
 }
 
-const gameOver = () => {
-    start = false;
-    startLaunch = false;
-    textInMessageBox.textContent = "Vous avez perdu !";
-    messageBox.classList.remove("cacheText");
-    playSound("Sound/sound-defeat.mp3");
-}
 
-const gameWin = () => {
+const gameTerminated = (message, sound) => {
     start = false;
     startLaunch = false;
-    textInMessageBox.textContent = "Félicitation !";
+    textInMessageBox.textContent = message
     messageBox.classList.remove("cacheText");
-    playSound("Sound/sound-success.mp3");
+    playSound(sound);
+    menu_lvl.style = "";
 }
 
 const playSound = (src) => {
     audio.src = src;
+    audio.volume = 0.5;
     audio.currentTime = 0
     audio.play();
 }
@@ -283,8 +297,49 @@ bouton_start.addEventListener("click", () => {
     points_numbers.textContent = 0;
     showMessage("");
     start = true;
-    helper.textContent = "Appuyer sur espace pour lancer la balle, <- et -> pour bouger";
+    menu_lvl.style = "display:none";
+    helper.innerHTML = "Appuyer sur espace pour lancer la balle, <br> <- et -> pour bouger,<br> les cotés gauche et droite (orange) inverse la direction de la balle";
 });
 
+const getLvlSelected = () => {
+    const lvlSelected = parseInt(select_lvl.value);
+
+    switch (lvlSelected) {
+        case 0: {
+            ball_vy = 2
+            max_row = 5;
+            max_briques = 5;
+        }
+            break;
+        case 1: {
+            ball_vy = 4;
+            max_row = 6;
+            max_briques = 7;
+        }
+            break;
+        case 2: {
+            ball_vy = 6;
+            max_row = 7;
+            max_briques = 8;
+        }
+            break;
+        case 3: {
+            ball_vy = 8;
+            max_row = 8;
+            max_briques = 10;
+        }
+            break;
+    }
+
+}
+
+document.addEventListener("change", () => {
+    bricks = [];
+    getLvlSelected();
+    createBricks();
+
+})
+
+getLvlSelected();
 createBricks();
 draw();
