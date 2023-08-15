@@ -101,7 +101,7 @@ class Paddle {
             }
 
         }
-        else if ((leftPressed || moveMobileLeft) && this.x - this.cornerWidht > 0 ) {
+        else if ((leftPressed || moveMobileLeft) && this.x - this.cornerWidht > 0) {
             this.x -= this.speed;
 
             if (!startLaunch) {
@@ -234,6 +234,16 @@ function draw() {
                         playSound("Sound/sound-brick.mp3");
                         bricks.splice(i, 1);
                         points_numbers.innerText++;
+
+                        const points_number_value = parseInt(points_numbers.innerText);
+
+                        if (points_number_value >= 10 && points_number_value <= 19) {
+                            points_numbers.style = "color:red";
+                        }
+                        else if (points_number_value >= 20) {
+                            points_numbers.style = "color:green";
+                        }
+
                         ball.vy = -ball.vy;
                         break;
                     }
@@ -259,6 +269,7 @@ const gameTerminated = (message, sound) => {
     textInMessageBox.textContent = message
     messageBox.classList.remove("cacheText");
     playSound(sound);
+    space.style = "";
     menu_lvl.style = "";
 }
 
@@ -318,10 +329,11 @@ rightMove.addEventListener("touchend", () => {
     moveMobileRight = false;
 })
 
-space.addEventListener("click", ()=>{
-    if(start){
+space.addEventListener("click", () => {
+    if (start) {
         startLaunch = true;
         helper.textContent = "";
+        space.style = "display:none";
     }
 })
 
@@ -330,6 +342,7 @@ bouton_start.addEventListener("click", () => {
     paddle.x = canvas.width / 2 - PADDLE_WIDTH / 2;
     bricks = [];
     createBricks();
+    points_numbers.style = ""; 
     points_numbers.textContent = 0;
     showMessage("");
     start = true;
