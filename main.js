@@ -12,8 +12,19 @@ const menu_lvl = document.getElementById("menu-lvl");
 
 const audio = document.getElementById("audio");
 
+const mobileMove = document.getElementById("mobile-move");
+const leftMove = document.getElementById("left-move");
+const space = document.getElementById("space");
+const rightMove = document.getElementById("right-move");
+
 let start = false;
 let startLaunch = false;
+
+let moveMobileLeft = false;
+let moveMobileRight = false;
+
+let rightPressed = false;
+let leftPressed = false;
 
 canvas.height = 600;
 canvas.width = 800;
@@ -37,8 +48,7 @@ let max_row = 5;
 let max_briques = 5;
 const BRIQUES_SPACEY = 30;
 
-let rightPressed = false;
-let leftPressed = false;
+
 
 
 
@@ -83,7 +93,7 @@ class Paddle {
     }
 
     move() {
-        if (rightPressed && this.x + this.width + this.cornerWidht < canvas.width) {
+        if ((rightPressed || moveMobileRight) && this.x + this.width + this.cornerWidht < canvas.width) {
             this.x += this.speed;
 
             if (!startLaunch) {
@@ -91,7 +101,7 @@ class Paddle {
             }
 
         }
-        else if (leftPressed && this.x - this.cornerWidht > 0) {
+        else if ((leftPressed || moveMobileLeft) && this.x - this.cornerWidht > 0 ) {
             this.x -= this.speed;
 
             if (!startLaunch) {
@@ -289,6 +299,32 @@ const keyUpHandler = (e) => {
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
+leftMove.addEventListener("touchstart", () => {
+
+    moveMobileLeft = true;
+})
+
+leftMove.addEventListener("touchend", () => {
+    moveMobileLeft = false;
+})
+
+
+rightMove.addEventListener("touchstart", () => {
+
+    moveMobileRight = true;
+})
+
+rightMove.addEventListener("touchend", () => {
+    moveMobileRight = false;
+})
+
+space.addEventListener("click", ()=>{
+    if(start){
+        startLaunch = true;
+        helper.textContent = "";
+    }
+})
+
 bouton_start.addEventListener("click", () => {
     ball = new Ball(canvas.width / 2, canvas.height - PADDLE_HEIGHT - BALL_RADIUS, BALL_RADIUS);
     paddle.x = canvas.width / 2 - PADDLE_WIDTH / 2;
@@ -298,7 +334,7 @@ bouton_start.addEventListener("click", () => {
     showMessage("");
     start = true;
     menu_lvl.style = "display:none";
-    helper.innerHTML = "Appuyer sur espace pour lancer la balle, <br> <- et -> pour bouger,<br> les cotés gauche et droite (orange) inverse la direction de la balle";
+    helper.innerHTML = "Appuyer sur espace pour lancer la balle, <br> <i class='fa-solid fa-arrow-left'></i> et <i class='fa-solid fa-arrow-right'></i> pour bouger,<br> les cotés gauche et droite (orange) inverse la direction de la balle";
 });
 
 const getLvlSelected = () => {
